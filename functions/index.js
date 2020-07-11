@@ -1,4 +1,10 @@
 const functions = require('firebase-functions');
+const FBAuth = require('./util/FBAuth');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+app.use(cors());
+
 const { db } = require('./util/admin');
 const {
   getAllWhispers,
@@ -18,9 +24,7 @@ const {
   getUserDetail,
   markNotiRead
 } = require('./handlers/users');
-const FBAuth = require('./util/FBAuth');
-const express = require('express');
-const app = express();
+
 
 //Route to get whispers
 app.get('/whispers', getAllWhispers);
@@ -127,8 +131,7 @@ exports.onUserImgChange = functions
           });
           return batch.commit();
         });
-    }
-    else return true;
+    } else return true;
   });
 
 exports.onPostDelete = functions
@@ -137,18 +140,27 @@ exports.onPostDelete = functions
   .onDelete((snapshot, context) => {
     const postId = context.params.postId;
     let batch = db.batch();
-    return db.collection('comments').where('postId', '==', postId).get()
+    return db
+      .collection('comments')
+      .where('postId', '==', postId)
+      .get()
       .then((data) => {
         data.forEach((doc) => {
           batch.delete(db.doc(`/comments/${doc.id}`));
         });
-        return db.collection('likes').where('postId', '==', postId).get()
+        return db
+          .collection('likes')
+          .where('postId', '==', postId)
+          .get();
       })
       .then((data) => {
         data.forEach((doc) => {
           batch.delete(db.doc(`/likes/${doc.id}`));
         });
-        return db.collection('notifications').where('postId', '==', postId).get()
+        return db
+          .collection('notifications')
+          .where('postId', '==', postId)
+          .get();
       })
       .then((data) => {
         data.forEach((doc) => {

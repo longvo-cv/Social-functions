@@ -62,18 +62,18 @@ exports.getWhisper = (req, res) => {
         .collection('comments')
         .orderBy('createdAt', 'desc')
         .where('postId', '==', req.params.postId)
-        .get()
-        .then((data) => {
-          postData.comments = [];
-          data.forEach((doc) => {
-            postData.comments.push(doc.data());
-          });
-          return res.json(postData);
-        })
-        .catch((err) => {
-          console.error(err);
-          res.status(500).json({ Error: err.code });
-        });
+        .get();
+    })
+    .then((data) => {
+      postData.comments = [];
+      data.forEach((doc) => {
+        postData.comments.push(doc.data());
+      });
+      return res.json(postData);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ Error: err });
     });
 };
 //Post a comment to db
@@ -121,7 +121,7 @@ exports.likePost = (req, res) => {
     .get()
     .then((doc) => {
       if (doc.exists) {
-       // console.log(doc.data());
+        // console.log(doc.data());
         postData = doc.data();
         postData.postId = doc.id;
         return likeStat.get();
